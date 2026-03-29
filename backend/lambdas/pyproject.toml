@@ -1,0 +1,8 @@
+[project]
+name = "lambdas"
+version = "0.1.0"
+requires-python = ">=3.15"
+dependencies = [
+    "boto3>=1.42.78",
+    "boto3-stubs[essential]>=1.42.78",
+]
