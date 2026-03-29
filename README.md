@@ -35,6 +35,16 @@ EventBridge (scheduled)
 | Scheduler | AWS EventBridge                   |
 | Database  | AWS DynamoDB                      |
 
+## File Structure
+
+```
+ping/
+├── frontend/       # React + Tailwind app
+├── backend/        # Lambda function handlers (Python)
+├── infra/          # AWS CDK app (Python)
+└── docs/           # Project documentation
+```
+
 ## Optional Enhancements
 
 - User-submitted sites for tracking (POST /sites, 1-week TTL)
