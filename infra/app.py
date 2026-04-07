@@ -1,7 +1,12 @@
-from aws_cdk import App
+from stacks.root_stack import RootStack
+import aws_cdk as cdk
 
-app = App()   
+TAGS = {
+    "Project": "ping",
+    "Environment": "Dev",
+    "CreatedBy": "Will",
+}
 
-# stacks go here
-
+app = cdk.App()
+RootStack(app, "ping-root", TAGS["Environment"], tags=TAGS)
 app.synth()
