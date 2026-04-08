@@ -20,7 +20,6 @@ class ApiStack(cdk.NestedStack):
             code=cdk.aws_lambda.Code.from_asset(str(hello_world_lambda_path)),
         )
 
-        # TODO: fix type error
         hello_world_lambda_integration = (
             cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
                 "HelloWorldLambdaIntegration", handler=hello_world_lambda
