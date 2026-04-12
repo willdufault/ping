@@ -8,7 +8,7 @@ export default function App() {
     console.log(response.data)
   }
 
-  async function handleGetGoogle(): Promise<void> {
+  async function handleGetSites(): Promise<void> {
     const response = await axios.get(`${API_URL}/sites`)
     console.log(response.data)
   }
@@ -28,9 +28,9 @@ export default function App() {
           </button>
           <button
             className="border border-gray-300 rounded px-3 py-1"
-            onClick={handleGetGoogle}
+            onClick={handleGetSites}
           >
-            get google
+            get sites
           </button>
         </div>
       </main>
