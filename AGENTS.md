@@ -4,10 +4,11 @@
 - See @README.md for project overview
 
 **Core guidelines:**
-- Keep responses extremely concise to reduce token usage
+- KEEP RESPONSES EXTREMELY BRIEF
+- Never use em dashes
 - Prioritize producing correct results over all else
 - Ask for clarification if requirements are ambiguous
-- Only perform tasks explicitly requested
+- Only perform tasks that are explicitly requested
 - Don't assume anything not explicitly stated
 
 **Coding standards:**

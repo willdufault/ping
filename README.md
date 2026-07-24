@@ -1,3 +1,5 @@
+<!-- TODO: Update info & api routes -->
+<!-- TODO: Update name with aws focus -->
 # ping
 
 A fullstack website status tracker that monitors uptime and latency for major sites.
