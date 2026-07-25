@@ -1,14 +1,12 @@
 import { useState } from "react"
 import axios from "axios"
 import UptimeTimeline from "./components/UptimeTimeline"
-
-const statuses = [200, 400, 500]
-const services = ["EC2", "Lambda", "S3", "DDB"]
-const regions = ["ue1", "ue2"] as const
-
-type Region = (typeof regions)[number]
-type Service = (typeof services)[number]
-type TimelineEntry = { timestamp: number; response: number }
+import { services, serviceLabels, serviceIcons } from "./constants/services"
+import { regions, regionLabels } from "./constants/regions"
+import { statuses } from "./constants/responses"
+import type { Service } from "./types/Service"
+import type { Region } from "./types/Region"
+import type { TimelineEntry } from "./types/Timeline"
 
 function generateData(): Record<Region, Record<Service, TimelineEntry[]>> {
   const result = {} as Record<Region, Record<Service, TimelineEntry[]>>
@@ -17,7 +15,7 @@ function generateData(): Record<Region, Record<Service, TimelineEntry[]>> {
     for (const service of services) {
       result[region][service] = Array.from({ length: 48 }, (_, i) => ({
         timestamp: i,
-        response: statuses[Math.floor(Math.random() * statuses.length)],
+        response: statuses[Math.floor(Math.random() * statuses.length)]
       }))
     }
   }
@@ -27,7 +25,7 @@ function generateData(): Record<Region, Record<Service, TimelineEntry[]>> {
 const mockData = generateData()
 
 export default function App() {
-  const [region, setRegion] = useState<Region>("ue1")
+  const [region, setRegion] = useState<Region>("us-east-1")
   const API_URL = import.meta.env.VITE_API_URL
 
   async function handleGetHello(): Promise<void> {
@@ -46,7 +44,7 @@ export default function App() {
         <h1 className="text-2xl">🛰️ ping</h1>
       </header>
       <main className="max-w-md mx-auto px-4">
-        <div className="flex gap-2">
+        <div className="flex gap-px">
           <button
             className="border border-gray-300 rounded px-3 py-1"
             onClick={handleGetHello}
@@ -62,22 +60,29 @@ export default function App() {
         </div>
         <div className="flex mt-4">
           <button
-            className={`px-3 py-1 rounded-l border border-gray-300 cursor-pointer ${region === "ue1" ? "bg-gray-200" : ""}`}
-            onClick={() => setRegion("ue1")}
+            className={`px-3 py-1 rounded-l border border-gray-300 cursor-pointer ${region === "us-east-1" ? "bg-gray-200" : ""}`}
+            onClick={() => setRegion("us-east-1")}
           >
-            ue1
+            {regionLabels["us-east-1"]}
           </button>
           <button
-            className={`px-3 py-1 rounded-r border border-l-0 border-gray-300 cursor-pointer ${region === "ue2" ? "bg-gray-200" : ""}`}
-            onClick={() => setRegion("ue2")}
+            className={`px-3 py-1 rounded-r border border-l-0 border-gray-300 cursor-pointer ${region === "us-east-2" ? "bg-gray-200" : ""}`}
+            onClick={() => setRegion("us-east-2")}
           >
-            ue2
+            {regionLabels["us-east-2"]}
           </button>
         </div>
-        <div className="mt-4 flex flex-col gap-2">
+        <div className="mt-4 flex flex-col gap-6">
           {services.map((service) => (
-            <div key={service}>
-              <p className="text-sm text-gray-600">{service}</p>
+            <div key={service} className="flex gap-6">
+              <div className="flex flex-col items-start shrink-0 gap-1">
+                <img
+                  src={serviceIcons[service]}
+                  alt={service}
+                  className="h-16 w-16"
+                />
+                <span className="text-xs text-gray-600">{serviceLabels[service]}</span>
+              </div>
               <UptimeTimeline data={mockData[region][service]} />
             </div>
           ))}
