@@ -10,16 +10,17 @@ class ApiStack(cdk.NestedStack):
         super().__init__(scope, id, **kwargs)
         api = cdk.aws_apigatewayv2.HttpApi(
             self,
-            "Api",
-            api_name="ping-api",
+            "PingApi",
+            api_name=f"ping-api-{environment.lower()}",
             cors_preflight=cdk.aws_apigatewayv2.CorsPreflightOptions(
+                # TODO: temp add real
                 allow_origins=["http://localhost:5173"],
                 allow_methods=[
                     cdk.aws_apigatewayv2.CorsHttpMethod.GET,
                     cdk.aws_apigatewayv2.CorsHttpMethod.POST,
                     cdk.aws_apigatewayv2.CorsHttpMethod.OPTIONS,
                 ],
-                allow_headers=["Content-Type"],
+                allow_headers=["Content-Type", "Authorization"],
             ),
         )
 
@@ -30,7 +31,7 @@ class ApiStack(cdk.NestedStack):
         hello_world_lambda = cdk.aws_lambda.Function(
             self,
             "HelloWorldLambda",
-            function_name="ping-hello-world",
+            function_name=f"ping-hello-world-{environment.lower()}",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
             handler="index.main",
             code=cdk.aws_lambda.Code.from_asset(str(hello_world_lambda_path)),
@@ -47,29 +48,29 @@ class ApiStack(cdk.NestedStack):
             integration=hello_world_lambda_integration,
         )
 
-        # GET /endpoints
-        check_endpoints_lambda_path = (
-            Path(__file__).parents[2] / "backend" / "lambdas" / "check_endpoints"
+        # GET /services
+        check_services_lambda_path = (
+            Path(__file__).parents[2] / "backend" / "lambdas" / "check_services"
         )
-        check_endpoints_lambda = PythonFunction(
+        check_services_lambda = PythonFunction(
             self,
-            "CheckEndpointsLambda",
-            function_name="ping-check-endpoints",
+            "CheckServicesLambda",
+            function_name=f"ping-check-services-{environment.lower()}",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
             timeout=cdk.Duration.seconds(30),
             handler="main",
-            entry=str(check_endpoints_lambda_path),
+            entry=str(check_services_lambda_path),
         )
-        check_endpoints_lambda_integration = (
+        check_services_lambda_integration = (
             cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "CheckEndpointsLambdaIntegration",
-                handler=check_endpoints_lambda,  # type:ignore
+                "CheckServicesLambdaIntegration",
+                handler=check_services_lambda,  # type:ignore
             )
         )
         api.add_routes(
-            path="/endpoints",
+            path="/services",
             methods=[cdk.aws_apigatewayv2.HttpMethod.GET],
-            integration=check_endpoints_lambda_integration,
+            integration=check_services_lambda_integration,
         )
 
         api.add_stage("ApiStage", stage_name=environment.lower(), auto_deploy=True)

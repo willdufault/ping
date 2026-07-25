@@ -8,5 +8,5 @@ TAGS = {
 }
 
 app = cdk.App()
-RootStack(app, "ping-root", TAGS["Environment"], tags=TAGS)
+RootStack(app, f"ping-root-{TAGS['Environment'].lower()}", TAGS["Environment"], tags=TAGS)
 app.synth()
