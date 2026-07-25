@@ -23,9 +23,12 @@ export default function UptimeTimeline({ data }: UptimeTimelineProps) {
           />
         ))}
       </div>
-      <div className="flex justify-between text-xs text-neutral-400">
+      <div className="flex items-center text-xs text-neutral-400">
         <span>24h</span>
+        <hr className="flex-1 border-neutral-500 mx-2 rounded-full" />
         <span>{uptime.toFixed(1)}%</span>
+        <hr className="flex-1 border-neutral-500 mx-2 rounded-full" />
+        <span>Now</span>
       </div>
     </div>
   )
