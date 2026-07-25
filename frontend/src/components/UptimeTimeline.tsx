@@ -12,9 +12,15 @@ export default function UptimeTimeline({ data }: UptimeTimelineProps) {
 
   return (
     <div className="w-full flex flex-col gap-1">
-      <div className="flex w-full">
+      <div className="flex w-full rounded-md overflow-clip">
         {data.map((entry, index) => (
-          <UptimeBar key={index} timestamp={entry.timestamp} response={entry.response} />
+          <UptimeBar
+            key={index}
+            timestamp={entry.timestamp}
+            response={entry.response}
+            isFirst={index === 0}
+            isLast={index === data.length - 1}
+          />
         ))}
       </div>
       <div className="flex justify-between text-xs text-neutral-400">

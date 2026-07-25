@@ -46,13 +46,13 @@ export default function App() {
       <main className="max-w-md mx-auto px-4">
         <div className="flex mt-4">
           <button
-            className={`px-3 py-1 rounded-l border border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-1" ? "bg-neutral-700" : ""}`}
+            className={`px-3 py-1 rounded-l-md border border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-1" ? "bg-neutral-700" : ""}`}
             onClick={() => setRegion("us-east-1")}
           >
             {regionLabels["us-east-1"]}
           </button>
           <button
-            className={`px-3 py-1 rounded-r border border-l-0 border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-2" ? "bg-neutral-700" : ""}`}
+            className={`px-3 py-1 rounded-r-md border border-l-0 border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-2" ? "bg-neutral-700" : ""}`}
             onClick={() => setRegion("us-east-2")}
           >
             {regionLabels["us-east-2"]}
