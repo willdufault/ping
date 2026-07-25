@@ -17,7 +17,7 @@ export default function UptimeTimeline({ data }: UptimeTimelineProps) {
           <UptimeBar key={index} timestamp={entry.timestamp} response={entry.response} />
         ))}
       </div>
-      <div className="flex justify-between text-xs text-gray-600">
+      <div className="flex justify-between text-xs text-neutral-400">
         <span>24h</span>
         <span>{uptime.toFixed(1)}%</span>
       </div>

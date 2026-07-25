@@ -40,33 +40,19 @@ export default function App() {
 
   return (
     <>
-      <header className="text-center border-b border-gray-200 bg-gray-100 px-4 py-3 mb-4">
+      <header className="text-center border-b border-neutral-500 bg-neutral-800 px-4 py-3 mb-4">
         <h1 className="text-2xl">🛰️ ping</h1>
       </header>
       <main className="max-w-md mx-auto px-4">
-        <div className="flex gap-px">
-          <button
-            className="border border-gray-300 rounded px-3 py-1"
-            onClick={handleGetHello}
-          >
-            get hello
-          </button>
-          <button
-            className="border border-gray-300 rounded px-3 py-1"
-            onClick={handleGetEndpoints}
-          >
-            get endpoints
-          </button>
-        </div>
         <div className="flex mt-4">
           <button
-            className={`px-3 py-1 rounded-l border border-gray-300 cursor-pointer ${region === "us-east-1" ? "bg-gray-200" : ""}`}
+            className={`px-3 py-1 rounded-l border border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-1" ? "bg-neutral-700" : ""}`}
             onClick={() => setRegion("us-east-1")}
           >
             {regionLabels["us-east-1"]}
           </button>
           <button
-            className={`px-3 py-1 rounded-r border border-l-0 border-gray-300 cursor-pointer ${region === "us-east-2" ? "bg-gray-200" : ""}`}
+            className={`px-3 py-1 rounded-r border border-l-0 border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-2" ? "bg-neutral-700" : ""}`}
             onClick={() => setRegion("us-east-2")}
           >
             {regionLabels["us-east-2"]}
@@ -79,9 +65,9 @@ export default function App() {
                 <img
                   src={serviceIcons[service]}
                   alt={service}
-                  className="h-16 w-16"
+                  className="h-16 w-16 rounded-md"
                 />
-                <span className="text-xs text-gray-600">{serviceLabels[service]}</span>
+                <span className="text-xs text-neutral-400">{serviceLabels[service]}</span>
               </div>
               <UptimeTimeline data={mockData[region][service]} />
             </div>

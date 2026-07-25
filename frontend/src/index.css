@@ -1,1 +1,6 @@
 @import "tailwindcss";
+
+html {
+  @apply scheme-dark;
+  @apply bg-neutral-800;
+}
