@@ -14,7 +14,7 @@ function generateData(): Record<Region, Record<Service, TimelineEntry[]>> {
     result[region] = {} as Record<Service, TimelineEntry[]>
     for (const service of services) {
       result[region][service] = Array.from({ length: 48 }, (_, i) => ({
-        timestamp: i,
+        timestamp: Date.now() - (47 - i) * 30 * 60 * 1000,
         response: statuses[Math.floor(Math.random() * statuses.length)]
       }))
     }
