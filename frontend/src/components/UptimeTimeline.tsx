@@ -12,7 +12,7 @@ export default function UptimeTimeline({ data }: UptimeTimelineProps) {
 
   return (
     <div className="w-full flex flex-col gap-1">
-      <div className="flex w-full rounded-md overflow-clip">
+      <div className="flex w-full">
         {data.map((entry, index) => (
           <UptimeBar
             key={index}

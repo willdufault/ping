@@ -27,11 +27,10 @@ function statusColor(response: number): string {
 }
 
 export function UptimeBar({ timestamp, response, isFirst = false, isLast = false }: UptimeBarProps) {
-  const borders = `${isFirst ? "" : "border-l"} ${isLast ? "" : "border-r"} border-neutral-800`
   return (
     <div className="relative flex-1 group">
       <div
-        className={`h-16 w-full ${borders} hover:opacity-80 ${statusColor(response)}`}
+        className={`h-16 w-full ${isFirst ? "rounded-l-md" : "border-l"} ${isLast ? "rounded-r-md" : "border-r"} border-neutral-800 hover:opacity-80 ${statusColor(response)}`}
       />
       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block z-10 bg-neutral-800 border border-neutral-500 rounded shadow-lg px-2 py-1 text-xs whitespace-nowrap">
         <div className="flex items-center gap-1.5">
