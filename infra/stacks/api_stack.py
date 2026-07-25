@@ -19,7 +19,7 @@ class ApiStack(cdk.NestedStack):
                     cdk.aws_apigatewayv2.CorsHttpMethod.POST,
                     cdk.aws_apigatewayv2.CorsHttpMethod.OPTIONS,
                 ],
-                allow_headers=["Content-Type", "Authorization"],
+                allow_headers=["Content-Type"],
             ),
         )
 
@@ -37,7 +37,8 @@ class ApiStack(cdk.NestedStack):
         )
         hello_world_lambda_integration = (
             cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "HelloWorldLambdaIntegration", handler=hello_world_lambda
+                "HelloWorldLambdaIntegration",
+                handler=hello_world_lambda,  # type:ignore
             )
         )
         api.add_routes(
@@ -61,7 +62,8 @@ class ApiStack(cdk.NestedStack):
         )
         check_endpoints_lambda_integration = (
             cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "CheckEndpointsLambdaIntegration", handler=check_endpoints_lambda
+                "CheckEndpointsLambdaIntegration",
+                handler=check_endpoints_lambda,  # type:ignore
             )
         )
         api.add_routes(
