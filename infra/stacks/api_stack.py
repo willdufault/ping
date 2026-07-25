@@ -30,6 +30,7 @@ class ApiStack(cdk.NestedStack):
         hello_world_lambda = cdk.aws_lambda.Function(
             self,
             "HelloWorldLambda",
+            function_name="ping-hello-world",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
             handler="index.main",
             code=cdk.aws_lambda.Code.from_asset(str(hello_world_lambda_path)),
@@ -45,26 +46,28 @@ class ApiStack(cdk.NestedStack):
             integration=hello_world_lambda_integration,
         )
 
-        # GET /sites
-        check_sites_lambda_path = (
-            Path(__file__).parents[2] / "backend" / "lambdas" / "check_sites"
+        # GET /endpoints
+        check_endpoints_lambda_path = (
+            Path(__file__).parents[2] / "backend" / "lambdas" / "check_endpoints"
         )
-        check_sites_lambda = PythonFunction(
+        check_endpoints_lambda = PythonFunction(
             self,
-            "CheckSitesLambda",
+            "CheckEndpointsLambda",
+            function_name="ping-check-endpoints",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
+            timeout=cdk.Duration.seconds(30),
             handler="main",
-            entry=str(check_sites_lambda_path),
+            entry=str(check_endpoints_lambda_path),
         )
-        check_sites_lambda_integration = (
+        check_endpoints_lambda_integration = (
             cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "CheckSitesLambdaIntegration", handler=check_sites_lambda
+                "CheckEndpointsLambdaIntegration", handler=check_endpoints_lambda
             )
         )
         api.add_routes(
-            path="/sites",
+            path="/endpoints",
             methods=[cdk.aws_apigatewayv2.HttpMethod.GET],
-            integration=check_sites_lambda_integration,
+            integration=check_endpoints_lambda_integration,
         )
 
         api.add_stage("ApiStage", stage_name=environment.lower(), auto_deploy=True)
