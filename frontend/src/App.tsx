@@ -3,7 +3,7 @@ import axios from "axios"
 import UptimeTimeline from "./components/UptimeTimeline"
 import { services, serviceLabels, serviceIcons } from "./constants/services"
 import { regions, regionLabels } from "./constants/regions"
-import { statuses } from "./constants/responses"
+import { statuses, statusColors, statusLabel } from "./constants/responses"
 import type { Service } from "./types/Service"
 import type { Region } from "./types/Region"
 import type { TimelineEntry } from "./types/Timeline"
@@ -59,19 +59,38 @@ export default function App() {
           </button>
         </div>
         <div className="mt-4 flex flex-col gap-6">
-          {services.map((service) => (
-            <div key={service} className="flex gap-6">
-              <div className="flex flex-col items-start shrink-0 gap-1">
-                <img
-                  src={serviceIcons[service]}
-                  alt={service}
-                  className="h-16 w-16 rounded-md"
-                />
-                <span className="text-xs text-neutral-400">{serviceLabels[service]}</span>
+          {services.map((service) => {
+            const data = mockData[region][service]
+            const lastResponse = data[data.length - 1].response
+            return (
+              <div key={service} className="flex gap-6">
+                <div className="flex flex-col items-start shrink-0 gap-1">
+                  <img
+                    src={serviceIcons[service]}
+                    alt={service}
+                    className="h-16 w-16 rounded-md"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-neutral-400">
+                      {serviceLabels[service]}
+                    </span>
+                    <div className="relative group">
+                      <div
+                        className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastResponse]}`}
+                      />
+                      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block z-10 bg-neutral-800 border border-neutral-500 rounded shadow-lg px-2 py-1 text-xs whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span>{statusLabel(lastResponse)}</span>
+                          <span className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastResponse]}`} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <UptimeTimeline data={data} />
               </div>
-              <UptimeTimeline data={mockData[region][service]} />
-            </div>
-          ))}
+            )
+          })}
         </div>
       </main>
     </>
