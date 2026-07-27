@@ -103,12 +103,13 @@ def main(event, context):
             "cloudfront": check_cloudfront,
         }
         with ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
-            futures = {
-                (service_name, region): executor.submit(check_function, region)
-                for service_name, check_function in service_checks.items()
-                for region in REGIONS
-            }
-            for (service_name, region), future in futures.items():
+            futures = []
+            for service_name, check_function in service_checks.items():
+                for region in REGIONS:
+                    future = executor.submit(check_function, region)
+                    futures.append((service_name, region, future))
+
+            for service_name, region, future in futures:
                 try:
                     future.result()
                     logger.info(
