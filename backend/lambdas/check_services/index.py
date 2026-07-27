@@ -35,7 +35,7 @@ SERVER_ERROR_CODE = 500
 config = Config(
     connect_timeout=TIMEOUT_SECONDS,
     read_timeout=TIMEOUT_SECONDS,
-    retries={"max_attempts": RETRY_COUNT, "mode": "standard"},
+    retries={"max_attempts": 1 + RETRY_COUNT, "mode": "standard"},
 )
 
 
