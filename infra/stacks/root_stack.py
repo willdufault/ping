@@ -9,10 +9,10 @@ from stacks.refresh_stack import RefreshStack
 class RootStack(cdk.Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
-        database_stack = DatabaseStack(self, "ping-database")
-        ApiStack(self, "ping-api")
+        database_stack = DatabaseStack(self, "PingDatabase")
+        ApiStack(self, "PingApi")
         RefreshStack(
             self,
-            "ping-refresh",
+            "PingRefresh",
             database_table=database_stack.status_history_table,
         )

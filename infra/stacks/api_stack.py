@@ -10,7 +10,7 @@ class ApiStack(cdk.NestedStack):
         api = cdk.aws_apigatewayv2.HttpApi(
             self,
             "PingApi",
-            api_name="ping-api",
+            api_name="ping_api",
             cors_preflight=cdk.aws_apigatewayv2.CorsPreflightOptions(
                 # TODO: temp add real
                 allow_origins=["http://localhost:5173"],
@@ -35,7 +35,7 @@ class ApiStack(cdk.NestedStack):
         hello_world_lambda = cdk.aws_lambda.Function(
             self,
             "HelloWorldLambda",
-            function_name="ping-hello-world",
+            function_name="ping_hello_world_lambda",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
             handler="index.main",
             code=cdk.aws_lambda.Code.from_asset(str(hello_world_lambda_path)),

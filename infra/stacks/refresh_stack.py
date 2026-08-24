@@ -27,7 +27,7 @@ class RefreshStack(cdk.NestedStack):
         check_services_lambda_role = cdk.aws_iam.Role(
             self,
             "CheckServicesLambdaRole",
-            role_name="ping-check-services-lambda-role",
+            role_name="ping_check_services_lambda_role",
             assumed_by=cdk.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
             inline_policies={
                 "RoleAccess": cdk.aws_iam.PolicyDocument(
@@ -54,7 +54,7 @@ class RefreshStack(cdk.NestedStack):
         check_services_lambda = PythonFunction(
             self,
             "CheckServicesLambda",
-            function_name="ping-check-services-lambda",
+            function_name="ping_check_services_lambda",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
             timeout=cdk.Duration.seconds(30),
             handler="main",
@@ -63,10 +63,10 @@ class RefreshStack(cdk.NestedStack):
             role=check_services_lambda_role,
         )
 
-        scheduler_role = cdk.aws_iam.Role(
+        schedule_role = cdk.aws_iam.Role(
             self,
-            "SchedulerRole",
-            role_name="ping-refresh-scheduler-role",
+            "ScheduleRole",
+            role_name="ping_refresh_schedule_role",
             assumed_by=cdk.aws_iam.ServicePrincipal(  # type:ignore
                 "scheduler.amazonaws.com"
             ),
@@ -85,7 +85,7 @@ class RefreshStack(cdk.NestedStack):
         cdk.aws_scheduler.CfnSchedule(
             self,
             "CheckServicesSchedule",
-            name="ping-refresh-schedule",
+            name="ping_refresh_schedule",
             schedule_expression="cron(0/30 * * * ? *)",
             schedule_expression_timezone="America/New_York",
             flexible_time_window=cdk.aws_scheduler.CfnSchedule.FlexibleTimeWindowProperty(
@@ -93,6 +93,6 @@ class RefreshStack(cdk.NestedStack):
             ),
             target=cdk.aws_scheduler.CfnSchedule.TargetProperty(
                 arn=check_services_lambda.function_arn,
-                role_arn=scheduler_role.role_arn,
+                role_arn=schedule_role.role_arn,
             ),
         )
