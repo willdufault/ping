@@ -53,30 +53,3 @@ class ApiStack(cdk.NestedStack):
             methods=[cdk.aws_apigatewayv2.HttpMethod.GET],
             integration=hello_world_lambda_integration,
         )
-
-        # GET /services
-        check_services_lambda_path = (
-            Path(__file__).parents[2] / "backend" / "lambdas" / "check_services"
-        )
-        check_services_lambda = PythonFunction(
-            self,
-            "CheckServicesLambda",
-            function_name=f"ping-check-services-{environment.lower()}",
-            runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
-            timeout=cdk.Duration.seconds(30),
-            handler="main",
-            entry=str(check_services_lambda_path),
-        )
-        check_services_lambda_integration = (
-            cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "CheckServicesLambdaIntegration",
-                handler=check_services_lambda,  # type:ignore
-            )
-        )
-        api.add_routes(
-            path="/services",
-            methods=[cdk.aws_apigatewayv2.HttpMethod.GET],
-            integration=check_services_lambda_integration,
-        )
-
-        api.add_stage("ApiStage", stage_name=environment.lower(), auto_deploy=True)
