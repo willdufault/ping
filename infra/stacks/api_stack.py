@@ -28,6 +28,11 @@ class ApiStack(cdk.NestedStack):
         hello_world_lambda_path = (
             Path(__file__).parents[2] / "backend" / "lambdas" / "hello_world"
         )
+        hello_world_lambda_log_group = cdk.aws_logs.LogGroup(
+            self,
+            "HelloWorldLambdaLogGroup",
+            retention=cdk.aws_logs.RetentionDays.TWO_WEEKS,
+        )
         hello_world_lambda = cdk.aws_lambda.Function(
             self,
             "HelloWorldLambda",
@@ -35,6 +40,7 @@ class ApiStack(cdk.NestedStack):
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
             handler="index.main",
             code=cdk.aws_lambda.Code.from_asset(str(hello_world_lambda_path)),
+            log_group=hello_world_lambda_log_group,
         )
         hello_world_lambda_integration = (
             cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
