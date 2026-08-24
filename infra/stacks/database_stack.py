@@ -4,7 +4,7 @@ from constructs import Construct
 
 
 class DatabaseStack(cdk.NestedStack):
-    def __init__(self, scope: Construct, id: str, environment: str, **kwargs) -> None:
+    def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
         responses_table = cdk.aws_dynamodb.TableV2(
             self,
