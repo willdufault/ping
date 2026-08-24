@@ -79,10 +79,7 @@ export default function App() {
                         className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastResponse]}`}
                       />
                       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block z-10 bg-neutral-800 border border-neutral-500 rounded shadow-lg px-2 py-1 text-xs whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <span>{statusLabel(lastResponse)}</span>
-                          <span className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastResponse]}`} />
-                        </div>
+                        <p>{statusLabel(lastResponse)}</p>
                       </div>
                     </div>
                   </div>
