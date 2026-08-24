@@ -9,5 +9,5 @@ export const statusColors: Record<number, string> = {
 export function statusLabel(response: number): string {
   if (response === 200) return "Operational"
   if (response === 400) return "Degraded"
-  return "Server error"
+  return "Unknown"
 }
