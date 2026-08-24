@@ -89,6 +89,7 @@ export default function App() {
             )
           })}
         </div>
+        <p className="text-neutral-400 text-xs mt-4">*ue1 only</p>
       </main>
     </>
   )
