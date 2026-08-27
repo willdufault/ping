@@ -136,5 +136,5 @@ def main(event, context):
                     logger.error(f"Failed to write {service_name}/{region}: {error}")
         return {"statusCode": 200}
     except Exception as error:
-        logger.error(f"{type(error).__name__}: {error}")
+        logger.exception(error)
         return {"statusCode": 500}
