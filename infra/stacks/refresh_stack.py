@@ -29,6 +29,11 @@ class RefreshStack(cdk.NestedStack):
             "CheckServicesLambdaRole",
             role_name="ping_check_services_lambda_role",
             assumed_by=cdk.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                cdk.aws_iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AWSLambdaBasicExecutionRole"
+                )
+            ],
             inline_policies={
                 "RoleAccess": cdk.aws_iam.PolicyDocument(
                     statements=[
@@ -39,7 +44,7 @@ class RefreshStack(cdk.NestedStack):
                         cdk.aws_iam.PolicyStatement(
                             actions=[
                                 "ec2:DescribeInstances",
-                                "s3:ListBuckets",
+                                "s3:ListAllMyBuckets",
                                 "lambda:ListFunctions",
                                 "dynamodb:ListTables",
                                 "cloudfront:ListDistributions",
@@ -61,6 +66,10 @@ class RefreshStack(cdk.NestedStack):
             entry=str(check_services_lambda_path),
             log_group=check_services_lambda_log_group,
             role=check_services_lambda_role,
+            environment={
+                "table_name": database_table.table_name,
+                "table_region": cdk.Aws.REGION,
+            },
         )
 
         schedule_role = cdk.aws_iam.Role(

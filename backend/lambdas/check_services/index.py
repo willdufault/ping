@@ -19,9 +19,6 @@ from botocore.exceptions import BotoCoreError
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-TABLE_NAME = env["table_name"]
-TABLE_REGION = env["table_region"]
-
 REGIONS = ["us-east-1", "us-east-2"]
 THREAD_COUNT = 4
 RETRY_COUNT = 1
@@ -32,15 +29,17 @@ SUCCESS_CODE = 200
 FAILURE_CODE = 400
 SERVER_ERROR_CODE = 500
 
-config = Config(
-    connect_timeout=TIMEOUT_SECONDS,
-    read_timeout=TIMEOUT_SECONDS,
-    retries={"max_attempts": 1 + RETRY_COUNT, "mode": "standard"},
-)
+TABLE_NAME = env["table_name"]
+TABLE_REGION = env["table_region"]
 
 
 @cache
 def get_client(service_name: str, region: str) -> BaseClient:
+    config = Config(
+        connect_timeout=TIMEOUT_SECONDS,
+        read_timeout=TIMEOUT_SECONDS,
+        retries={"max_attempts": 1 + RETRY_COUNT, "mode": "standard"},
+    )
     return boto3.client(service_name, config=config, region_name=region)  # type:ignore
 
 
