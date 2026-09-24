@@ -40,6 +40,7 @@ export default function App() {
 
   return (
     <>
+      <button onClick={handleGetHello} className="border m-2">hello world</button>
       <header className="text-center border-b border-neutral-500 bg-neutral-800 px-4 py-3 mb-4">
         <h1 className="text-2xl">🛰️ ping</h1>
       </header>
@@ -89,7 +90,7 @@ export default function App() {
             )
           })}
         </div>
-        <p className="text-neutral-400 text-xs mt-4">*ue1 only</p>
+        <p className="text-neutral-400 text-xs mt-4">*Global service</p>
       </main>
     </>
   )
