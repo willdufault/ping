@@ -15,19 +15,19 @@ class RefreshStack(cdk.NestedStack):
     ) -> None:
         super().__init__(scope, id, **kwargs)
 
-        check_services_lambda_path = (
-            Path(__file__).parents[2] / "backend" / "lambdas" / "check_services"
+        collect_service_statuses_lambda_path = (
+            Path(__file__).parents[2] / "backend" / "lambdas" / "collect_service_statuses"
         )
-        check_services_lambda_log_group = cdk.aws_logs.LogGroup(
+        collect_service_statuses_lambda_log_group = cdk.aws_logs.LogGroup(
             self,
-            "CheckServicesLambdaLogGroup",
+            "CollectServiceStatusesLambdaLogGroup",
             retention=cdk.aws_logs.RetentionDays.TWO_WEEKS,
         )
 
-        check_services_lambda_role = cdk.aws_iam.Role(
+        collect_service_statuses_lambda_role = cdk.aws_iam.Role(
             self,
-            "CheckServicesLambdaRole",
-            role_name="ping_check_services_lambda_role",
+            "CollectServiceStatusesLambdaRole",
+            role_name="ping_collect_service_statuses_lambda_role",
             assumed_by=cdk.aws_iam.ServicePrincipal("lambda.amazonaws.com"),
             managed_policies=[
                 cdk.aws_iam.ManagedPolicy.from_aws_managed_policy_name(
@@ -56,16 +56,16 @@ class RefreshStack(cdk.NestedStack):
             },
         )
 
-        check_services_lambda = PythonFunction(
+        collect_service_statuses_lambda = PythonFunction(
             self,
-            "CheckServicesLambda",
-            function_name="ping_check_services_lambda",
+            "CollectServiceStatusesLambda",
+            function_name="ping_collect_service_statuses_lambda",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
             timeout=cdk.Duration.seconds(30),
             handler="main",
-            entry=str(check_services_lambda_path),
-            log_group=check_services_lambda_log_group,
-            role=check_services_lambda_role,
+            entry=str(collect_service_statuses_lambda_path),
+            log_group=collect_service_statuses_lambda_log_group,
+            role=collect_service_statuses_lambda_role,
             environment={
                 "table_name": database_table.table_name,
                 "table_region": cdk.Aws.REGION,
@@ -84,7 +84,7 @@ class RefreshStack(cdk.NestedStack):
                     statements=[
                         cdk.aws_iam.PolicyStatement(
                             actions=["lambda:InvokeFunction"],
-                            resources=[check_services_lambda.function_arn],
+                            resources=[collect_service_statuses_lambda.function_arn],
                         )
                     ]
                 )
@@ -93,7 +93,7 @@ class RefreshStack(cdk.NestedStack):
 
         cdk.aws_scheduler.CfnSchedule(
             self,
-            "CheckServicesSchedule",
+            "CollectServiceStatusesSchedule",
             name="ping_refresh_schedule",
             schedule_expression="cron(0/30 * * * ? *)",
             schedule_expression_timezone="America/New_York",
@@ -101,7 +101,7 @@ class RefreshStack(cdk.NestedStack):
                 mode="OFF",
             ),
             target=cdk.aws_scheduler.CfnSchedule.TargetProperty(
-                arn=check_services_lambda.function_arn,
+                arn=collect_service_statuses_lambda.function_arn,
                 role_arn=schedule_role.role_arn,
             ),
         )

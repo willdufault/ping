@@ -1,7 +1,7 @@
 """
-Check health of AWS services across regions using parallel API calls. Returns
-status codes for each service: 200 for healthy, 400 for service failures, 500
-for server/internal failures.
+Collect health status of AWS services across regions using parallel API calls.
+Writes status codes for each service to DynamoDB for later fetch: 200 for
+healthy, 400 for service failures, 500 for server/internal failures.
 """
 
 import logging
