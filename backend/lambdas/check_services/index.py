@@ -74,18 +74,20 @@ def check_cloudfront(region: str) -> None:
 def write_to_db(
     service_name: str, region: str, status_code: int, timestamp: int
 ) -> None:
-    # NOTE: Read-modify-write is not atomic. This is acceptable because EventBridge
-    # triggers this Lambda every 30 minutes, preventing concurrent invocations.
-    item = dynamodb_table.get_item(Key={"PK": service_name, "SK": region})
-    existing_responses = item.get("Item", {}).get("responses", [])
-    assert isinstance(existing_responses, list)
-    existing_responses.append({"timestamp": timestamp, "status_code": status_code})
-    existing_responses = existing_responses[-MAX_DATAPOINTS:]
+    # Read-modify-write is not atomic. This is acceptable because EventBridge triggers
+    # this Lambda every 30 minutes, preventing concurrent invocations.
+    item = dynamodb_table.get_item(
+        Key={"PK": f"SERVICE#{service_name}", "SK": f"REGION#{region}"}
+    )
+    status_history = item.get("Item", {}).get("status_history", [])
+    assert isinstance(status_history, list)
+    status_history.append({"timestamp": timestamp, "status_code": status_code})
+    status_history = status_history[-MAX_DATAPOINTS:]
     dynamodb_table.put_item(
         Item={
-            "PK": service_name,
-            "SK": region,
-            "responses": existing_responses,
+            "PK": f"SERVICE#{service_name}",
+            "SK": f"REGION#{region}",
+            "status_history": status_history,
         }
     )
 
