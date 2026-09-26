@@ -44,7 +44,7 @@ ping/
 ├── frontend/       # React + Tailwind app
 ├── backend/        # Lambda function handlers (Python)
 ├── infra/          # AWS CDK app (Python)
-└── docs/           # Project documentation
+└── TODO.md         # Project documentation
 ```
 
 ## Optional Enhancements
