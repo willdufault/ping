@@ -1,6 +1,4 @@
-// Time formatting for status tooltips and the refreshed label.
-
-// Both expect a millisecond epoch, matching TimelineEntry.timestamp.
+// Status tooltips and the refreshed label; both take a millisecond epoch.
 export function formatDateTime(timestamp: number): string {
   return new Date(timestamp)
     .toLocaleString(undefined, {

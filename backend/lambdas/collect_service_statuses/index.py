@@ -1,13 +1,8 @@
 """
-Collect health status of AWS services across regions using parallel API calls.
-Writes status codes for each service to DynamoDB for later fetch: 200 for
-healthy, 400 for service failures, 500 for server/internal failures.
-
-One item per (region, service), with region as the partition key so the read API
-can fetch a whole region as a single partition lookup. get_service_statuses
-depends on this key layout and cannot import it, since each Lambda is packaged
-from its own directory. The two share the region list through the `regions`
-environment variable, which CDK sets from REGIONS in infra/app.py.
+Check AWS service health in parallel across regions, storing one DynamoDB item
+per (region, service): 200 healthy, 400 service failure, 500 unknown.
+get_service_statuses reads this layout and shares the `regions` env var, but
+cannot import this code since each Lambda bundles its own directory.
 """
 
 import logging
@@ -80,8 +75,7 @@ def check_cloudfront(region: str) -> None:
 def write_to_db(
     service_name: str, region: str, status_code: int, timestamp: int
 ) -> None:
-    # Read-modify-write is not atomic. This is acceptable because EventBridge triggers
-    # this Lambda every 30 minutes, preventing concurrent invocations.
+    # Read-modify-write is not atomic, so a concurrent invoke can drop a datapoint.
     item_key = {"PK": f"REGION#{region}", "SK": f"SERVICE#{service_name}"}
     item = dynamodb_table.get_item(Key=item_key)
     status_history = item.get("Item", {}).get("status_history", [])
@@ -116,9 +110,8 @@ def main(event, context):
                         f"Check succeeded {service_name}/{region}: {SUCCESS_CODE}"
                     )
                     responses_by_region[region][service_name] = SUCCESS_CODE
-                # ClientError means the service itself answered with an error, so the
-                # service is at fault. Anything else (BotoCoreError and friends) means
-                # we never got a usable answer, which is our fault, not the service's.
+                # ClientError means the service answered with an error. Anything else
+                # means we never got an answer, so blame us rather than the service.
                 except ClientError as error:
                     logger.warning(
                         f"Check failed {service_name}/{region}: {FAILURE_CODE} - {error}"
@@ -132,8 +125,7 @@ def main(event, context):
         for region, responses in responses_by_region.items():
             for service_name, status_code in responses.items():
                 try:
-                    # TODO: if ddb is down this wont be written and ui will not reflect this
-                    # need to have some logic in ui or something or backfill data for missing data
+                    # Infra is in us-west-2, so isolated if us-east-1/us-east-2 impacted.
                     write_to_db(service_name, region, status_code, timestamp)
                 except Exception as error:
                     logger.error(f"Failed to write {service_name}/{region}: {error}")

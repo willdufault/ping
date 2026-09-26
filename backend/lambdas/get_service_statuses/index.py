@@ -1,16 +1,9 @@
 """
-Fetch service status history from DynamoDB for a single region. Returns a dict
-mapping each service name to its full status_history list for the requested
-region, keyed by the lowercase service name as stored.
-
-Items are partitioned by region, written by collect_service_statuses, so one
-Query returns the whole region. Each service is a single capped item, so the
-result stays far below the 1MB page limit and no pagination is needed.
-
-The region list comes from the `regions` environment variable, which CDK sets
-from REGIONS in infra/app.py. region defaults to the first entry and is rejected
-with 400 if it is not in the list, so a typo is not mistaken for "no data
-collected yet".
+Return one region's status history from DynamoDB, keyed by service name. Items
+are partitioned by region, so one query covers it and no pagination is needed.
+region defaults to the first entry of the `regions` env var (REGIONS in
+infra/app.py) and is rejected with 400 if unknown, so a typo is not mistaken
+for no data.
 """
 
 import json
