@@ -6,26 +6,26 @@ import dynamodbIcon from "../assets/images/aws-dynamodb.webp"
 import cloudfrontIcon from "../assets/images/aws-cloudfront.webp"
 
 export const services = [
-  "EC2",
-  "Lambda",
-  "S3",
-  "DynamoDB",
-  "CloudFront"
+  "ec2",
+  "lambda",
+  "s3",
+  "dynamodb",
+  "cloudfront"
 ] as const
 
 // Asterisk means ue1-only
 export const serviceLabels: Record<Service, string> = {
-  EC2: "EC2",
-  Lambda: "Lambda",
-  S3: "S3",
-  DynamoDB: "DDB",
-  CloudFront: "CF*"
+  ec2: "EC2",
+  lambda: "Lambda",
+  s3: "S3",
+  dynamodb: "DDB",
+  cloudfront: "CF*"
 }
 
 export const serviceIcons: Record<Service, string> = {
-  EC2: ec2Icon,
-  Lambda: lambdaIcon,
-  S3: s3Icon,
-  DynamoDB: dynamodbIcon,
-  CloudFront: cloudfrontIcon
+  ec2: ec2Icon,
+  lambda: lambdaIcon,
+  s3: s3Icon,
+  dynamodb: dynamodbIcon,
+  cloudfront: cloudfrontIcon
 }
