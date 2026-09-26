@@ -20,7 +20,6 @@ TABLE_NAME = env["table_name"]
 TABLE_REGION = env["table_region"]
 
 REGIONS = [region.strip() for region in env["regions"].split(",")]
-DEFAULT_REGION = REGIONS[0]
 
 dynamodb_table = boto3.resource("dynamodb", region_name=TABLE_REGION).Table(TABLE_NAME)
 
@@ -28,7 +27,7 @@ dynamodb_table = boto3.resource("dynamodb", region_name=TABLE_REGION).Table(TABL
 def main(event, context):
     try:
         query_params = event.get("queryStringParameters") or {}
-        region = query_params.get("region") or DEFAULT_REGION
+        region = query_params.get("region") or REGIONS[0]
         if region not in REGIONS:
             logger.warning(f"Rejected request for unknown region: {region}")
             return {

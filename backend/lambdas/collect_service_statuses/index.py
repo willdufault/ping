@@ -7,7 +7,6 @@ cannot import this code since each Lambda bundles its own directory.
 
 import logging
 import time
-from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from functools import cache
 from os import environ as env
@@ -33,14 +32,15 @@ SERVER_ERROR_CODE = 500
 TABLE_NAME = env["table_name"]
 TABLE_REGION = env["table_region"]
 
+config = Config(
+    connect_timeout=TIMEOUT_SECONDS,
+    read_timeout=TIMEOUT_SECONDS,
+    retries={"max_attempts": 1 + RETRY_COUNT, "mode": "standard"},
+)
+
 
 @cache
 def get_client(service_name: str, region: str) -> BaseClient:
-    config = Config(
-        connect_timeout=TIMEOUT_SECONDS,
-        read_timeout=TIMEOUT_SECONDS,
-        retries={"max_attempts": 1 + RETRY_COUNT, "mode": "standard"},
-    )
     return boto3.client(service_name, config=config, region_name=region)  # type:ignore
 
 
@@ -88,7 +88,6 @@ def write_to_db(
 def main(event, context):
     try:
         timestamp = int(time.time())
-        responses_by_region = defaultdict(dict)
         service_checks = {
             "ec2": check_ec2,
             "s3": check_s3,
@@ -109,27 +108,26 @@ def main(event, context):
                     logger.info(
                         f"Check succeeded {service_name}/{region}: {SUCCESS_CODE}"
                     )
-                    responses_by_region[region][service_name] = SUCCESS_CODE
+                    status_code = SUCCESS_CODE
                 # ClientError means the service answered with an error. Anything else
                 # means we never got an answer, so blame us rather than the service.
                 except ClientError as error:
                     logger.warning(
                         f"Check failed {service_name}/{region}: {FAILURE_CODE} - {error}"
                     )
-                    responses_by_region[region][service_name] = FAILURE_CODE
+                    status_code = FAILURE_CODE
                 except Exception as error:
                     logger.error(
                         f"Check failed {service_name}/{region}: {SERVER_ERROR_CODE} - {error}"
                     )
-                    responses_by_region[region][service_name] = SERVER_ERROR_CODE
-        for region, responses in responses_by_region.items():
-            for service_name, status_code in responses.items():
+                    status_code = SERVER_ERROR_CODE
+
+                # Infra is in us-west-2, so isolated if us-east-1/us-east-2 impacted.
                 try:
-                    # Infra is in us-west-2, so isolated if us-east-1/us-east-2 impacted.
                     write_to_db(service_name, region, status_code, timestamp)
                 except Exception as error:
                     logger.error(f"Failed to write {service_name}/{region}: {error}")
-        return {"statusCode": 200}
+        return {"statusCode": SUCCESS_CODE}
     except Exception as error:
         logger.exception(error)
-        return {"statusCode": 500}
+        return {"statusCode": SERVER_ERROR_CODE}

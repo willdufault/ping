@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import aws_cdk as cdk
+from aws_cdk.aws_lambda_python_alpha import PythonFunction
 from constructs import Construct
 
 
@@ -58,13 +59,13 @@ class ApiStack(cdk.NestedStack):
                 )
             },
         )
-        get_service_statuses_lambda = cdk.aws_lambda.Function(
+        get_service_statuses_lambda = PythonFunction(
             self,
             "GetServiceStatusesLambda",
             function_name="ping_get_service_statuses_lambda",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
-            handler="index.main",
-            code=cdk.aws_lambda.Code.from_asset(str(get_service_statuses_lambda_path)),
+            handler="main",
+            entry=str(get_service_statuses_lambda_path),
             timeout=cdk.Duration.seconds(30),
             log_group=get_service_statuses_lambda_log_group,
             role=get_service_statuses_lambda_role,
