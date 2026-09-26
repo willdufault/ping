@@ -46,7 +46,7 @@ def main(event, context):
             KeyConditionExpression=Key("PK").eq(f"REGION#{region}")
         )
         statuses = {
-            item["SK"].removeprefix("SERVICE#"): item["status_history"]
+            item["SK"].removeprefix("SERVICE#"): item.get("status_history", [])
             for item in query_response["Items"]
         }
         # DynamoDB returns numbers as Decimal, which json cannot encode.
