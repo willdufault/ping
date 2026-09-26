@@ -30,36 +30,6 @@ class ApiStack(cdk.NestedStack):
             ),
         )
 
-        # GET /hello
-        hello_world_lambda_path = (
-            Path(__file__).parents[2] / "backend" / "lambdas" / "hello_world"
-        )
-        hello_world_lambda_log_group = cdk.aws_logs.LogGroup(
-            self,
-            "HelloWorldLambdaLogGroup",
-            retention=cdk.aws_logs.RetentionDays.TWO_WEEKS,
-        )
-        hello_world_lambda = cdk.aws_lambda.Function(
-            self,
-            "HelloWorldLambda",
-            function_name="ping_hello_world_lambda",
-            runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
-            handler="index.main",
-            code=cdk.aws_lambda.Code.from_asset(str(hello_world_lambda_path)),
-            log_group=hello_world_lambda_log_group,
-        )
-        hello_world_lambda_integration = (
-            cdk.aws_apigatewayv2_integrations.HttpLambdaIntegration(
-                "HelloWorldLambdaIntegration",
-                handler=hello_world_lambda,  # type:ignore
-            )
-        )
-        api.add_routes(
-            path="/hello",
-            methods=[cdk.aws_apigatewayv2.HttpMethod.GET],
-            integration=hello_world_lambda_integration,
-        )
-
         get_service_statuses_lambda_path = (
             Path(__file__).parents[2] / "backend" / "lambdas" / "get_service_statuses"
         )

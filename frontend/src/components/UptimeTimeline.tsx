@@ -17,8 +17,7 @@ export default function UptimeTimeline({ data }: UptimeTimelineProps) {
         {data.map((entry, index) => (
           <UptimeBar
             key={index}
-            timestamp={entry.timestamp}
-            statusCode={entry.statusCode}
+            {...entry}
             isFirst={index === 0}
             isLast={index === data.length - 1}
           />

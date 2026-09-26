@@ -1,28 +1,5 @@
 # TODO
 
-## Feat
-
-- add Last refreshed xyz to ui
-
-## Bugs
-
-- **Timestamp units are mismatched.** `collect_service_statuses/index.py` stores
-  `int(time.time())` in seconds, but the frontend mock in `App.tsx` builds
-  `Date.now()` values in milliseconds and `UptimeBar` renders with
-  `new Date(timestamp)`. Wiring up the real fetch without converting will render
-  every bar as Jan 1970. Convert at the fetch boundary and decide which unit the
-  `TimelineEntry.timestamp` field is meant to hold.
-
-## Wiring up the frontend
-
-`App.tsx` still renders `generateData()` mock data. Replacing it needs a decision
-on what to render before the first response arrives, plus loading and error
-states, and a refetch when the region toggle changes.
-
-The fetch mapper has two jobs, both stemming from the API boundary: rename
-`status_code` to `statusCode` to match the camelCase prop convention, and
-convert the writer's epoch seconds to the milliseconds `UptimeBar` passes to
-`new Date`.
 
 ## Storage model
 

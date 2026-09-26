@@ -1,74 +1,56 @@
 // Ping status dashboard: region toggle, per-service uptime bars, freshness label.
-import { useState } from "react"
-import axios from "axios"
+import { useEffect, useState } from "react"
 import UptimeTimeline from "./components/UptimeTimeline"
 import { services, serviceLabels, serviceIcons } from "./constants/services"
 import { regions, regionLabels } from "./constants/regions"
-import { statuses, statusColors, statusLabel } from "./constants/responses"
+import { statusColors, statusLabel } from "./constants/responses"
 import { formatTimeOfDay } from "./utils/formatTime"
-import type { Service } from "./types/Service"
+import { fetchServiceStatuses } from "./utils/fetchServiceStatuses"
 import type { Region } from "./types/Region"
-import type { TimelineEntry } from "./types/Timeline"
-
-function generateData(): Record<Region, Record<Service, TimelineEntry[]>> {
-  const result = {} as Record<Region, Record<Service, TimelineEntry[]>>
-  for (const region of regions) {
-    result[region] = {} as Record<Service, TimelineEntry[]>
-    for (const service of services) {
-      result[region][service] = Array.from({ length: 48 }, (_, i) => ({
-        timestamp: Date.now() - (47 - i) * 30 * 60 * 1000,
-        statusCode: statuses[Math.floor(Math.random() * statuses.length)]
-      }))
-    }
-  }
-  return result
-}
-
-const mockData = generateData()
+import type { TimelineData } from "./types/Timeline"
 
 export default function App() {
   const [region, setRegion] = useState<Region>("us-east-1")
-  const API_URL = import.meta.env.VITE_API_URL
-  const lastRefreshed = formatTimeOfDay(mockData[region].ec2.at(-1)!.timestamp)
+  // One fetch per region per visit: a region already in the cache is never refetched.
+  const [cache, setCache] = useState<Partial<Record<Region, TimelineData>>>({})
 
-  async function handleGetHello(): Promise<void> {
-    const response = await axios.get(`${API_URL}/hello`)
-    console.log(response.data)
-  }
+  useEffect(() => {
+    if (cache[region] !== undefined) return
+    fetchServiceStatuses(region).then((fetched) => {
+      setCache((previous) => ({ ...previous, [region]: fetched }))
+    })
+  }, [region, cache])
 
-  async function handleGetEndpoints(): Promise<void> {
-    const response = await axios.get(`${API_URL}/status`)
-    console.log(response.data)
-  }
+  const data = cache[region] ?? {}
+  const lastRefreshed = data.ec2?.at(-1)?.timestamp
 
   return (
     <>
-      <button onClick={handleGetHello} className="border m-2">hello world</button>
       <header className="text-center border-b border-neutral-500 bg-neutral-800 px-4 py-3 mb-4">
         <h1 className="text-2xl">🛰️ ping</h1>
       </header>
       <main className="max-w-md mx-auto px-4">
         <div className="flex items-end mt-4">
-          <button
-            className={`px-3 py-1 rounded-l-md border border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-1" ? "bg-neutral-700" : ""}`}
-            onClick={() => setRegion("us-east-1")}
-          >
-            {regionLabels["us-east-1"]}
-          </button>
-          <button
-            className={`px-3 py-1 rounded-r-md border border-l-0 border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-2" ? "bg-neutral-700" : ""}`}
-            onClick={() => setRegion("us-east-2")}
-          >
-            {regionLabels["us-east-2"]}
-          </button>
-          <span className="ml-auto text-xs text-neutral-400">
-            Refreshed {lastRefreshed}
-          </span>
+          {regions.map((option, index) => (
+            <button
+              key={option}
+              className={`px-3 py-1 border border-neutral-500 hover:bg-neutral-700 cursor-pointer ${index === 0 ? "rounded-l-md" : "border-l-0"} ${index === regions.length - 1 ? "rounded-r-md" : ""} ${region === option ? "bg-neutral-700" : ""}`}
+              onClick={() => setRegion(option)}
+            >
+              {regionLabels[option]}
+            </button>
+          ))}
+          {lastRefreshed !== undefined && (
+            <span className="ml-auto text-xs text-neutral-400">
+              Refreshed {formatTimeOfDay(lastRefreshed)}
+            </span>
+          )}
         </div>
         <div className="mt-4 flex flex-col gap-6">
           {services.map((service) => {
-            const data = mockData[region][service]
-            const lastStatusCode = data[data.length - 1].statusCode
+            const entries = data[service]
+            if (!entries?.length) return null
+            const lastStatusCode = entries[entries.length - 1].statusCode
             return (
               <div key={service} className="flex gap-6">
                 <div className="flex flex-col items-start shrink-0 gap-1">
@@ -91,7 +73,7 @@ export default function App() {
                     </div>
                   </div>
                 </div>
-                <UptimeTimeline data={data} />
+                <UptimeTimeline data={entries} />
               </div>
             )
           })}

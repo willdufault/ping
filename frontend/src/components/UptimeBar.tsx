@@ -1,10 +1,9 @@
 // One bar in a service's uptime timeline, plus its hover tooltip.
 import { statusColors, statusLabel } from "../constants/responses"
 import { formatDateTime } from "../utils/formatTime"
+import type { TimelineEntry } from "../types/Timeline"
 
-type UptimeBarProps = {
-  timestamp: number
-  statusCode: number
+type UptimeBarProps = TimelineEntry & {
   isFirst?: boolean
   isLast?: boolean
 }
