@@ -20,7 +20,7 @@ from os import environ as env
 import boto3
 from botocore.client import BaseClient
 from botocore.config import Config
-from botocore.exceptions import BotoCoreError
+from botocore.exceptions import ClientError
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -116,7 +116,10 @@ def main(event, context):
                         f"Check succeeded {service_name}/{region}: {SUCCESS_CODE}"
                     )
                     responses_by_region[region][service_name] = SUCCESS_CODE
-                except BotoCoreError as error:
+                # ClientError means the service itself answered with an error, so the
+                # service is at fault. Anything else (BotoCoreError and friends) means
+                # we never got a usable answer, which is our fault, not the service's.
+                except ClientError as error:
                     logger.warning(
                         f"Check failed {service_name}/{region}: {FAILURE_CODE} - {error}"
                     )
