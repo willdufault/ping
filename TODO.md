@@ -12,9 +12,6 @@
   `new Date(timestamp)`. Wiring up the real fetch without converting will render
   every bar as Jan 1970. Convert at the fetch boundary and decide which unit the
   `TimelineEntry.timestamp` field is meant to hold.
-- **Unknown `region` returns `200 {}`.** `get_service_statuses/index.py` accepts
-  any `?region=` value, so a typo looks identical to "no data yet". Validate
-  against the known set and return 400.
 
 ## Wiring up the frontend
 
@@ -39,10 +36,13 @@ convert the writer's epoch seconds to the milliseconds `UptimeBar` passes to
   visible gap in the key sequence instead of the silent hole in the array.
   Costs: needs a DynamoDB TTL on an `expires_at` attribute for cleanup, and a
   full region view reads 240 items instead of 5, roughly 3 RCU to roughly 30.
-- **`DEFAULT_REGION` duplicates `REGIONS`.** `get_service_statuses/index.py`
-  hardcodes `us-east-1` separately from the writer's `REGIONS` list, so the
-  default drifts silently. Either validate both against a shared constant or have
-  CDK inject the region list into both Lambdas as an environment variable.
+- **The region list is duplicated between infra and the frontend.** Both Lambdas
+  now read the `regions` environment variable, which CDK sets from the single
+  `REGIONS` list in `infra/app.py`, so the backend cannot drift internally.
+  `frontend/src/constants/regions.ts` is still a separate copy, and a region
+  added on one side but not the other means the UI offers a region the API
+  rejects with 400, or hides a region that is being collected. Serving the list
+  from the API, or generating the frontend constant, would close this.
 
 ## Fragility
 
@@ -52,4 +52,3 @@ convert the writer's epoch seconds to the milliseconds `UptimeBar` passes to
   test that writes then reads through the real table would catch this.
 - **CORS is hardcoded to `http://localhost:5173`** in `api_stack.py`, so
   anything other than local dev is blocked.
-- **`app.py` has an f-string with no placeholders** (ruff `F541`).

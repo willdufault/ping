@@ -6,7 +6,8 @@ healthy, 400 for service failures, 500 for server/internal failures.
 One item per (region, service), with region as the partition key so the read API
 can fetch a whole region as a single partition lookup. get_service_statuses
 depends on this key layout and cannot import it, since each Lambda is packaged
-from its own directory.
+from its own directory. The two share the region list through the `regions`
+environment variable, which CDK sets from REGIONS in infra/app.py.
 """
 
 import logging
@@ -24,7 +25,7 @@ from botocore.exceptions import BotoCoreError
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-REGIONS = ["us-east-1", "us-east-2"]
+REGIONS = [region.strip() for region in env["regions"].split(",")]
 THREAD_COUNT = 4
 RETRY_COUNT = 1
 TIMEOUT_SECONDS = 3

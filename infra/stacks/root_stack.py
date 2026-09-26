@@ -7,16 +7,20 @@ from stacks.refresh_stack import RefreshStack
 
 
 class RootStack(cdk.Stack):
-    def __init__(self, scope: Construct, id: str, **kwargs) -> None:
+    def __init__(
+        self, scope: Construct, id: str, regions: list[str], **kwargs
+    ) -> None:
         super().__init__(scope, id, **kwargs)
         database_stack = DatabaseStack(self, "PingDatabase")
         ApiStack(
             self,
             "PingApi",
             database_table=database_stack.status_history_table,
+            regions=regions,
         )
         RefreshStack(
             self,
             "PingRefresh",
             database_table=database_stack.status_history_table,
+            regions=regions,
         )

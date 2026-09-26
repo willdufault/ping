@@ -10,6 +10,7 @@ class ApiStack(cdk.NestedStack):
         scope: Construct,
         id: str,
         database_table: cdk.aws_dynamodb.TableV2,
+        regions: list[str],
         **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
@@ -100,6 +101,7 @@ class ApiStack(cdk.NestedStack):
             environment={
                 "table_name": database_table.table_name,
                 "table_region": cdk.Aws.REGION,
+                "regions": ",".join(regions),
             },
         )
         get_service_statuses_lambda_integration = (
