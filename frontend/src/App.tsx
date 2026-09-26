@@ -1,9 +1,11 @@
+// Ping status dashboard: region toggle, per-service uptime bars, freshness label.
 import { useState } from "react"
 import axios from "axios"
 import UptimeTimeline from "./components/UptimeTimeline"
 import { services, serviceLabels, serviceIcons } from "./constants/services"
 import { regions, regionLabels } from "./constants/regions"
 import { statuses, statusColors, statusLabel } from "./constants/responses"
+import { formatTimeOfDay } from "./utils/formatTime"
 import type { Service } from "./types/Service"
 import type { Region } from "./types/Region"
 import type { TimelineEntry } from "./types/Timeline"
@@ -27,6 +29,7 @@ const mockData = generateData()
 export default function App() {
   const [region, setRegion] = useState<Region>("us-east-1")
   const API_URL = import.meta.env.VITE_API_URL
+  const lastRefreshed = formatTimeOfDay(mockData[region].ec2.at(-1)!.timestamp)
 
   async function handleGetHello(): Promise<void> {
     const response = await axios.get(`${API_URL}/hello`)
@@ -45,7 +48,7 @@ export default function App() {
         <h1 className="text-2xl">🛰️ ping</h1>
       </header>
       <main className="max-w-md mx-auto px-4">
-        <div className="flex mt-4">
+        <div className="flex items-end mt-4">
           <button
             className={`px-3 py-1 rounded-l-md border border-neutral-500 hover:bg-neutral-700 cursor-pointer ${region === "us-east-1" ? "bg-neutral-700" : ""}`}
             onClick={() => setRegion("us-east-1")}
@@ -58,6 +61,9 @@ export default function App() {
           >
             {regionLabels["us-east-2"]}
           </button>
+          <span className="ml-auto text-xs text-neutral-400">
+            Refreshed {lastRefreshed}
+          </span>
         </div>
         <div className="mt-4 flex flex-col gap-6">
           {services.map((service) => {
