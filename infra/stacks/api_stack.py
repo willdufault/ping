@@ -10,7 +10,7 @@ class ApiStack(cdk.NestedStack):
         scope: Construct,
         id: str,
         database_table: cdk.aws_dynamodb.TableV2,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
         api = cdk.aws_apigatewayv2.HttpApi(

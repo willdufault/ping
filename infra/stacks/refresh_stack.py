@@ -11,12 +11,15 @@ class RefreshStack(cdk.NestedStack):
         scope: Construct,
         id: str,
         database_table: cdk.aws_dynamodb.TableV2,
-        **kwargs
+        **kwargs,
     ) -> None:
         super().__init__(scope, id, **kwargs)
 
         collect_service_statuses_lambda_path = (
-            Path(__file__).parents[2] / "backend" / "lambdas" / "collect_service_statuses"
+            Path(__file__).parents[2]
+            / "backend"
+            / "lambdas"
+            / "collect_service_statuses"
         )
         collect_service_statuses_lambda_log_group = cdk.aws_logs.LogGroup(
             self,
