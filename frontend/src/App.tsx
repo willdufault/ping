@@ -1,9 +1,10 @@
 // Ping status dashboard: region toggle, per-service uptime bars, freshness label.
 import { useEffect, useState } from "react"
 import UptimeTimeline from "./components/UptimeTimeline"
+import { StatusTooltip } from "./components/StatusTooltip"
 import { services, serviceLabels, serviceIcons } from "./constants/services"
 import { regions, regionLabels } from "./constants/regions"
-import { statusColors, statusLabel } from "./constants/responses"
+import { statusColors } from "./constants/responses"
 import { formatTimeOfDay } from "./utils/formatTime"
 import { fetchServiceStatuses } from "./utils/fetchServiceStatuses"
 import type { Region } from "./types/Region"
@@ -67,9 +68,7 @@ export default function App() {
                       <div
                         className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastStatusCode]}`}
                       />
-                      <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block z-10 bg-neutral-800 border border-neutral-500 rounded shadow-lg px-2 py-1 text-xs whitespace-nowrap">
-                        <p>{statusLabel(lastStatusCode)}</p>
-                      </div>
+                      <StatusTooltip statusCode={lastStatusCode} />
                     </div>
                   </div>
                 </div>
