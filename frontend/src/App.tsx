@@ -27,11 +27,11 @@ export default function App() {
 
   return (
     <>
-      <header className="text-center border-b border-neutral-500 bg-neutral-800 px-4 py-3 mb-4">
-        <h1 className="text-2xl">🛰️ ping</h1>
+      <header className="max-w-md mx-auto px-4 my-8">
+        <h1 className="text-2xl">☁️ ping</h1>
       </header>
       <main className="max-w-md mx-auto px-4">
-        <div className="flex items-end mt-4">
+        <div className="flex items-end">
           {regions.map((option, index) => (
             <button
               key={option}
