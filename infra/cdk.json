@@ -1,6 +1,5 @@
 {
   "app": "uv run app.py",
-  "profile": "wduf_ping",
   "watch": {
     "include": [
       "**"
