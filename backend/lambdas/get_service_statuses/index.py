@@ -49,10 +49,10 @@ def main(event, context):
             item["SK"].removeprefix("SERVICE#"): item["status_history"]
             for item in query_response["Items"]
         }
-        # status_history numbers come back as Decimal, which json cannot encode.
+        # DynamoDB returns numbers as Decimal, which json cannot encode.
         return {
             "statusCode": 200,
-            "body": json.dumps(statuses, default=float),
+            "body": json.dumps(statuses, default=int),
         }
     except Exception as error:
         logger.exception(error)
