@@ -6,8 +6,8 @@ export const statusColors: Record<number, string> = {
   500: "bg-neutral-400",
 }
 
-export function statusLabel(response: number): string {
-  if (response === 200) return "Operational"
-  if (response === 400) return "Degraded"
+export function statusLabel(statusCode: number): string {
+  if (statusCode === 200) return "Operational"
+  if (statusCode === 400) return "Degraded"
   return "Unknown"
 }

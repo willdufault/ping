@@ -1,13 +1,14 @@
 import { UptimeBar } from "./UptimeBar"
+import type { TimelineEntry } from "../types/Timeline"
 
 type UptimeTimelineProps = {
-  data: { timestamp: number; response: number }[]
+  data: TimelineEntry[]
 }
 
 export default function UptimeTimeline({ data }: UptimeTimelineProps) {
   const uptime =
     Math.trunc(
-      (data.filter((e) => e.response === 200).length / data.length) * 1000
+      (data.filter((e) => e.statusCode === 200).length / data.length) * 1000
     ) / 10
 
   return (
@@ -17,7 +18,7 @@ export default function UptimeTimeline({ data }: UptimeTimelineProps) {
           <UptimeBar
             key={index}
             timestamp={entry.timestamp}
-            response={entry.response}
+            statusCode={entry.statusCode}
             isFirst={index === 0}
             isLast={index === data.length - 1}
           />

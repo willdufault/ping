@@ -15,7 +15,7 @@ function generateData(): Record<Region, Record<Service, TimelineEntry[]>> {
     for (const service of services) {
       result[region][service] = Array.from({ length: 48 }, (_, i) => ({
         timestamp: Date.now() - (47 - i) * 30 * 60 * 1000,
-        response: statuses[Math.floor(Math.random() * statuses.length)]
+        statusCode: statuses[Math.floor(Math.random() * statuses.length)]
       }))
     }
   }
@@ -34,7 +34,7 @@ export default function App() {
   }
 
   async function handleGetEndpoints(): Promise<void> {
-    const response = await axios.get(`${API_URL}/endpoints`)
+    const response = await axios.get(`${API_URL}/status`)
     console.log(response.data)
   }
 
@@ -62,7 +62,7 @@ export default function App() {
         <div className="mt-4 flex flex-col gap-6">
           {services.map((service) => {
             const data = mockData[region][service]
-            const lastResponse = data[data.length - 1].response
+            const lastStatusCode = data[data.length - 1].statusCode
             return (
               <div key={service} className="flex gap-6">
                 <div className="flex flex-col items-start shrink-0 gap-1">
@@ -77,10 +77,10 @@ export default function App() {
                     </span>
                     <div className="relative group">
                       <div
-                        className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastResponse]}`}
+                        className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastStatusCode]}`}
                       />
                       <div className="absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block z-10 bg-neutral-800 border border-neutral-500 rounded shadow-lg px-2 py-1 text-xs whitespace-nowrap">
-                        <p>{statusLabel(lastResponse)}</p>
+                        <p>{statusLabel(lastStatusCode)}</p>
                       </div>
                     </div>
                   </div>
