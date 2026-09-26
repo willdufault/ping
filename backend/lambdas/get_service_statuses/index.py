@@ -2,6 +2,10 @@
 Fetch service status history from DynamoDB for a single region. Returns a dict
 mapping each service name to its full status_history list for the requested
 region, keyed by the lowercase service name as stored.
+
+Items are partitioned by region, written by collect_service_statuses, so one
+Query returns the whole region. Each service is a single capped item, so the
+result stays far below the 1MB page limit and no pagination is needed.
 """
 
 import json
@@ -27,16 +31,16 @@ def main(event, context):
             "region", DEFAULT_REGION
         )
         query_response = dynamodb_table.query(
-            KeyConditionExpression=Key("PK").begins_with("SERVICE#")
+            KeyConditionExpression=Key("PK").eq(f"REGION#{region}")
         )
         statuses = {
-            item["PK"].removeprefix("SERVICE#"): item["status_history"]
+            item["SK"].removeprefix("SERVICE#"): item["status_history"]
             for item in query_response["Items"]
-            if item["SK"] == f"REGION#{region}"
         }
+        # status_history numbers come back as Decimal, which json cannot encode.
         return {
             "statusCode": 200,
-            "body": json.dumps(statuses),
+            "body": json.dumps(statuses, default=float),
         }
     except Exception as error:
         logger.exception(error)
@@ -44,4 +48,3 @@ def main(event, context):
             "statusCode": 500,
             "body": json.dumps({"error": "Failed to fetch service statuses"}),
         }
-

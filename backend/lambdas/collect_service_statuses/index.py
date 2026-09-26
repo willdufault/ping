@@ -2,6 +2,11 @@
 Collect health status of AWS services across regions using parallel API calls.
 Writes status codes for each service to DynamoDB for later fetch: 200 for
 healthy, 400 for service failures, 500 for server/internal failures.
+
+One item per (region, service), with region as the partition key so the read API
+can fetch a whole region as a single partition lookup. get_service_statuses
+depends on this key layout and cannot import it, since each Lambda is packaged
+from its own directory.
 """
 
 import logging
@@ -76,20 +81,13 @@ def write_to_db(
 ) -> None:
     # Read-modify-write is not atomic. This is acceptable because EventBridge triggers
     # this Lambda every 30 minutes, preventing concurrent invocations.
-    item = dynamodb_table.get_item(
-        Key={"PK": f"SERVICE#{service_name}", "SK": f"REGION#{region}"}
-    )
+    item_key = {"PK": f"REGION#{region}", "SK": f"SERVICE#{service_name}"}
+    item = dynamodb_table.get_item(Key=item_key)
     status_history = item.get("Item", {}).get("status_history", [])
     assert isinstance(status_history, list)
     status_history.append({"timestamp": timestamp, "status_code": status_code})
     status_history = status_history[-MAX_DATAPOINTS:]
-    dynamodb_table.put_item(
-        Item={
-            "PK": f"SERVICE#{service_name}",
-            "SK": f"REGION#{region}",
-            "status_history": status_history,
-        }
-    )
+    dynamodb_table.put_item(Item={**item_key, "status_history": status_history})
 
 
 def main(event, context):
