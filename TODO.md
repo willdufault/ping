@@ -6,3 +6,5 @@
 - [ ] add to my website
 - [ ] set up ping domain
 - [ ] add architecture + docs - note tradeoffs + key decisions
+- [ ] ui overhaul
+- [ ] loading animation
