@@ -10,7 +10,6 @@ import logging
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from enum import StrEnum
 from functools import cache
 from os import environ as env
 
@@ -25,18 +24,14 @@ from botocore.exceptions import (
     ReadTimeoutError,
 )
 
+from enums.status import Status
+
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 REGIONS = [region.strip() for region in env["regions"].split(",")]
 THREAD_COUNT = 4
 MAX_DATAPOINTS = 48
-
-class Status(StrEnum):
-    HEALTHY = "Healthy"
-    DEGRADED = "Degraded"
-    OUTAGE = "Outage"
-    UNKNOWN = "Unknown"
 
 # Socket timeout, distinct from the latency threshold that marks a call degraded.
 TIMEOUT_SECONDS = 5
