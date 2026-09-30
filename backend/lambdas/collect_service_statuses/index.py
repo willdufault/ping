@@ -10,6 +10,7 @@ import logging
 import time
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+from enum import StrEnum
 from functools import cache
 from os import environ as env
 
@@ -31,10 +32,11 @@ REGIONS = [region.strip() for region in env["regions"].split(",")]
 THREAD_COUNT = 4
 MAX_DATAPOINTS = 48
 
-HEALTHY = "healthy"
-DEGRADED = "degraded"
-OUTAGE = "outage"
-UNKNOWN = "unknown"
+class Status(StrEnum):
+    HEALTHY = "Healthy"
+    DEGRADED = "Degraded"
+    OUTAGE = "Outage"
+    UNKNOWN = "Unknown"
 
 # Socket timeout, distinct from the latency threshold that marks a call degraded.
 TIMEOUT_SECONDS = 5
@@ -124,11 +126,13 @@ def timed_check(
     return time.perf_counter() - started_at, error
 
 
-def classify_check(elapsed: float, error: Exception | None) -> tuple[str, str | None]:
+def classify_check(
+    elapsed: float, error: Exception | None
+) -> tuple[Status, str | None]:
     if error is None:
         if elapsed < LATENCY_THRESHOLD_SECONDS:
-            return HEALTHY, None
-        return DEGRADED, "Increased latency"
+            return Status.HEALTHY, None
+        return Status.DEGRADED, "Increased latency"
 
     if isinstance(error, ClientError):
         code = error.response.get("Error", {}).get("Code", "")
@@ -137,27 +141,29 @@ def classify_check(elapsed: float, error: Exception | None) -> tuple[str, str | 
 
         # Checked before 5xx because three of those codes are 503s.
         if http_status == 429 or code in THROTTLE_CODES:
-            return DEGRADED, "Throttling"
+            return Status.DEGRADED, "Throttling"
 
         if http_status >= 500:
-            return OUTAGE, "Service error"
+            return Status.OUTAGE, "Service error"
 
     if isinstance(error, UNREACHABLE_ERRORS):
-        return OUTAGE, "Service unreachable"
+        return Status.OUTAGE, "Service unreachable"
 
     # Credential, region and param errors land here: our fault, not an outage.
-    return UNKNOWN, str(error)
+    return Status.UNKNOWN, str(error)
 
 
 def write_to_db(
-    service_name: str, region: str, status: str, message: str | None, timestamp: int
+    service_name: str, region: str, status: Status, message: str | None, timestamp: int
 ) -> None:
     # Read-modify-write is not atomic, so a concurrent invoke can drop a datapoint.
     item_key = {"PK": f"REGION#{region}", "SK": f"SERVICE#{service_name}"}
     item = dynamodb_table.get_item(Key=item_key)
     status_history = item.get("Item", {}).get("status_history", [])
     assert isinstance(status_history, list)
-    status_history.append({"timestamp": timestamp, "status": status, "message": message})
+    status_history.append(
+        {"timestamp": timestamp, "status": status, "message": message}
+    )
     status_history = status_history[-MAX_DATAPOINTS:]
     dynamodb_table.put_item(Item={**item_key, "status_history": status_history})
 

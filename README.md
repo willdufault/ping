@@ -34,19 +34,19 @@ Browser (React + Vite, dev server on :5173)
 The check job runs in us-west-2 on purpose. If us-east-1 or us-east-2 goes down,
 the job that watches it is unaffected.
 
-## Status Codes
+## Status
 
 Each check stores a status and a message. A check that succeeds in under 3
 seconds is healthy; anything else is one of the three problem states.
 
-| Status     | Message                  | Meaning                                     |
-| ---------- | ------------------------ | ------------------------------------------- |
-| `healthy`  | none                     | the call worked, in under 3 seconds         |
-| `degraded` | `Increased latency`      | the call worked, but took 3 seconds or more  |
-| `degraded` | `Throttling`             | the service replied 429 or a throttle code  |
-| `outage`   | `Service error`          | the service replied with a 5xx              |
-| `outage`   | `Service unreachable`    | no reply at all within 5 seconds            |
-| `unknown`  | the raw error            | we got an error, but it is not a service fault |
+| Status     | Message               | Meaning                                        |
+| ---------- | --------------------- | ---------------------------------------------- |
+| `Healthy`  | none                  | the call worked, in under 3 seconds            |
+| `Degraded` | `Increased latency`   | the call worked, but took 3 seconds or more    |
+| `Degraded` | `Throttling`          | the service replied 429 or a throttle code    |
+| `Outage`   | `Service error`       | the service replied with a 5xx                 |
+| `Outage`   | `Service unreachable` | no reply at all within 5 seconds               |
+| `Unknown`  | the raw error         | we got an error, but it is not a service fault |
 
 Two thresholds, and they are not the same number. `LATENCY_THRESHOLD_SECONDS` (3)
 decides whether a working call is healthy or degraded. `TIMEOUT_SECONDS` (5) is
@@ -58,7 +58,7 @@ send them consistently: `Throttling` arrives as 400, `SlowDown` and
 `RequestLimitExceeded` as 503, and `RequestThrottled` as 403. Only 429 is
 reliable enough to check on its own.
 
-`unknown` is the fallback for anything that is our fault rather than the
+`Unknown` is the fallback for anything that is our fault rather than the
 service's — expired credentials, a bad region, a parameter botocore rejected.
 Those used to be reported as the service being down.
 

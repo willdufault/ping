@@ -9,5 +9,5 @@
 - [ ] add to my website
 
 - [WIP] update terms to be operational? healthy? / degraded / unavailable? outage? / unknown
-- - use enum for statuses? capitalize statuses in db + readme, code review uncommitted changes
+- [x] use enum for statuses, capitalize statuses in db + readme
 
