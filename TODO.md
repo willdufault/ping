@@ -1,10 +1,13 @@
 # TODO
 
 - [ ] add cicd pipeline for s3 + infra deploy on github
-- [ ] update terms to be healthy / degraded / unavailable? outage? / unknown
-- [ ] fix cors
-- [ ] add to my website
-- [ ] set up ping domain
-- [ ] add architecture + docs - note tradeoffs + key decisions
-- [ ] ui overhaul
 - [ ] loading animation
+- [ ] fix cors
+- [ ] ui overhaul
+- [ ] add architecture + docs - note tradeoffs + key decisions
+- [ ] set up ping domain
+- [ ] add to my website
+
+- [WIP] update terms to be operational? healthy? / degraded / unavailable? outage? / unknown
+- - use enum for statuses? capitalize statuses in db + readme, code review uncommitted changes
+

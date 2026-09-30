@@ -65,7 +65,10 @@ class RefreshStack(cdk.NestedStack):
             "CollectServiceStatusesLambda",
             function_name="ping_collect_service_statuses_lambda",
             runtime=cdk.aws_lambda.Runtime.PYTHON_3_13,
-            timeout=cdk.Duration.seconds(30),
+            timeout=cdk.Duration.seconds(60),
+            # EC2's service model is ~20MB of the process, so the default 128MB
+            # leaves little headroom. More memory also buys cold start CPU.
+            memory_size=256,
             handler="main",
             entry=str(collect_service_statuses_lambda_path),
             log_group=collect_service_statuses_lambda_log_group,

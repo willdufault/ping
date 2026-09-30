@@ -12,7 +12,7 @@ per service.
   status page
 - **Region switcher** — us-east-1 and us-east-2, fetched once per region per visit
 - **24h timeline** — 48 half-hour blocks per service, hover for the time and status
-- **Three states** — OK, Degraded, Unknown
+- **Four states** — Healthy, Degraded, Outage, Unknown, with the reason shown
 - **Last checked** — shown in the header
 
 ## How It Works
@@ -36,13 +36,31 @@ the job that watches it is unaffected.
 
 ## Status Codes
 
-Each check stores a status code instead of a response time.
+Each check stores a status and a message. A check that succeeds in under 3
+seconds is healthy; anything else is one of the three problem states.
 
-| Code  | Shown as  | Meaning                             |
-| ----- | --------- | ----------------------------------- |
-| `200` | OK        | the call worked                     |
-| `400` | Degraded  | the service replied with an error   |
-| `500` | Unknown   | no reply at all, so it may be our fault |
+| Status     | Message                  | Meaning                                     |
+| ---------- | ------------------------ | ------------------------------------------- |
+| `healthy`  | none                     | the call worked, in under 3 seconds         |
+| `degraded` | `Increased latency`      | the call worked, but took 3 seconds or more  |
+| `degraded` | `Throttling`             | the service replied 429 or a throttle code  |
+| `outage`   | `Service error`          | the service replied with a 5xx              |
+| `outage`   | `Service unreachable`    | no reply at all within 5 seconds            |
+| `unknown`  | the raw error            | we got an error, but it is not a service fault |
+
+Two thresholds, and they are not the same number. `LATENCY_THRESHOLD_SECONDS` (3)
+decides whether a working call is healthy or degraded. `TIMEOUT_SECONDS` (5) is
+botocore's socket timeout, and anything past it raises a read timeout, which is
+an outage. Between the two sits the degraded window.
+
+Throttle codes are matched by name rather than by status, because AWS does not
+send them consistently: `Throttling` arrives as 400, `SlowDown` and
+`RequestLimitExceeded` as 503, and `RequestThrottled` as 403. Only 429 is
+reliable enough to check on its own.
+
+`unknown` is the fallback for anything that is our fault rather than the
+service's — expired credentials, a bad region, a parameter botocore rejected.
+Those used to be reported as the service being down.
 
 ## Data
 
@@ -50,8 +68,8 @@ One DynamoDB table, `ping_status_history`. One item per region and service:
 
 - `PK` = `REGION#<region>`
 - `SK` = `SERVICE#<service>`
-- `status_history` = list of `{timestamp, status_code}`, trimmed to the last 48
-  entries, which is 24 hours at this schedule
+- `status_history` = list of `{timestamp, status, message}`, trimmed to the last
+  48 entries, which is 24 hours at this schedule
 
 Each check reads the item, appends to the list, and writes it back. Two runs at
 the same time can lose a datapoint.
@@ -121,6 +139,18 @@ dashboard runs from the dev server until that is widened.
 Nothing to run locally. Both handlers only run as Lambdas. CDK bundles their
 dependencies at deploy time, so edits in `backend/lambdas/` show up after a
 deploy.
+
+To type check:
+
+```sh
+cd backend
+uv run --with pyright pyright lambdas
+```
+
+There is no pyright config, so it uses the defaults. It currently reports 12
+errors, all on `get_service_statuses/index.py:41`, where the `boto3-stubs` type
+for an item attribute is a union of every possible value. Treat that as the
+baseline rather than a clean run.
 
 ### Infrastructure
 
