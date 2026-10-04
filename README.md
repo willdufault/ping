@@ -36,20 +36,20 @@ the job that watches it is unaffected.
 
 ## Status
 
-Each check stores a status and a message. A check that succeeds in under 3
+Each check stores a status and a message. A check that succeeds in under 5
 seconds is healthy; anything else is one of the three problem states.
 
 | Status     | Message               | Meaning                                        |
 | ---------- | --------------------- | ---------------------------------------------- |
-| `Healthy`  | none                  | the call worked, in under 3 seconds            |
-| `Degraded` | `Increased latency`   | the call worked, but took 3 seconds or more    |
+| `Healthy`  | none                  | the call worked, in under 5 seconds            |
+| `Degraded` | `Increased latency`   | the call worked, but took 5 seconds or more    |
 | `Degraded` | `Throttling`          | the service replied 429 or a throttle code    |
 | `Outage`   | `Service error`       | the service replied with a 5xx                 |
-| `Outage`   | `Service unreachable` | no reply at all within 5 seconds               |
+| `Outage`   | `Service unreachable` | no reply at all within 10 seconds              |
 | `Unknown`  | the raw error         | we got an error, but it is not a service fault |
 
-Two thresholds, and they are not the same number. `LATENCY_THRESHOLD_SECONDS` (3)
-decides whether a working call is healthy or degraded. `TIMEOUT_SECONDS` (5) is
+Two thresholds, and they are not the same number. `LATENCY_THRESHOLD_SECONDS` (5)
+decides whether a working call is healthy or degraded. `TIMEOUT_SECONDS` (10) is
 botocore's socket timeout, and anything past it raises a read timeout, which is
 an outage. Between the two sits the degraded window.
 

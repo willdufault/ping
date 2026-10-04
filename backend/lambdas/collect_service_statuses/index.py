@@ -34,8 +34,8 @@ THREAD_COUNT = 4
 MAX_DATAPOINTS = 48
 
 # Socket timeout, distinct from the latency threshold that marks a call degraded.
-TIMEOUT_SECONDS = 5
-LATENCY_THRESHOLD_SECONDS = 3
+TIMEOUT_SECONDS = 10
+LATENCY_THRESHOLD_SECONDS = 5
 
 # Throttle codes from botocore's _retry.json. Several arrive as 503
 # (RequestLimitExceeded, EC2ThrottledException, SlowDown) rather than 429, so the
@@ -109,6 +109,23 @@ def check_cloudfront(region: str) -> None:
     cloudfront.list_distributions()  # type:ignore
 
 
+SERVICE_CHECKS = {
+    "ec2": check_ec2,
+    "s3": check_s3,
+    "lambda": check_lambda,
+    "dynamodb": check_dynamodb,
+    "cloudfront": check_cloudfront,
+}
+
+
+def prewarm_clients() -> None:
+    # Client construction loads service models and is not service latency, so
+    # build every client before any timer starts.
+    for service_name in SERVICE_CHECKS:
+        for region in REGIONS:
+            get_client(service_name, region)
+
+
 def timed_check(
     check_function: Callable[[str], None], region: str
 ) -> tuple[float, Exception | None]:
@@ -166,16 +183,11 @@ def write_to_db(
 def main(event, context):
     try:
         timestamp = int(time.time())
-        service_checks = {
-            "ec2": check_ec2,
-            "s3": check_s3,
-            "lambda": check_lambda,
-            "dynamodb": check_dynamodb,
-            "cloudfront": check_cloudfront,
-        }
+        prewarm_clients()
+
         with ThreadPoolExecutor(max_workers=THREAD_COUNT) as executor:
             futures = []
-            for service_name, check_function in service_checks.items():
+            for service_name, check_function in SERVICE_CHECKS.items():
                 for region in REGIONS:
                     future = executor.submit(timed_check, check_function, region)
                     futures.append((service_name, region, future))
@@ -183,7 +195,9 @@ def main(event, context):
             for service_name, region, future in futures:
                 elapsed, error = future.result()
                 status, message = classify_check(elapsed, error)
-                logger.info(f"Check {service_name}/{region}: {status} - {message}")
+                logger.info(
+                    f"Check {service_name}/{region}: {status} - {message} ({elapsed:.2f}s)"
+                )
 
                 # Infra is in us-west-2, so isolated if us-east-1/us-east-2 impacted.
                 try:
