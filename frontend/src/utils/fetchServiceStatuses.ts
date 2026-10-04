@@ -21,8 +21,8 @@ export async function fetchServiceStatuses(
     if (!entries) continue
     // The API sends epoch seconds, the domain type holds milliseconds.
     data[service] = entries.map((entry) => ({
-      timestamp: entry.timestamp * 1000,
-      statusCode: entry.status_code
+      ...entry,
+      timestamp: entry.timestamp * 1000
     }))
   }
   return data

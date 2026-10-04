@@ -4,7 +4,7 @@ import UptimeTimeline from "./components/UptimeTimeline"
 import { StatusTooltip } from "./components/StatusTooltip"
 import { services, serviceLabels, serviceIcons } from "./constants/services"
 import { regions, regionLabels } from "./constants/regions"
-import { statusColors } from "./constants/responses"
+import { statusColors } from "./constants/statuses"
 import { formatTimeOfDay } from "./utils/formatTime"
 import { fetchServiceStatuses } from "./utils/fetchServiceStatuses"
 import type { Region } from "./types/Region"
@@ -51,7 +51,7 @@ export default function App() {
           {services.map((service) => {
             const entries = data[service]
             if (!entries?.length) return null
-            const lastStatusCode = entries[entries.length - 1].statusCode
+            const lastEntry = entries[entries.length - 1]
             return (
               <div key={service} className="flex gap-6">
                 <div className="flex flex-col items-start shrink-0 gap-1">
@@ -66,9 +66,12 @@ export default function App() {
                     </span>
                     <div className="relative group">
                       <div
-                        className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastStatusCode]}`}
+                        className={`h-2 w-2 rounded-full mt-0.5 ${statusColors[lastEntry.status]}`}
                       />
-                      <StatusTooltip statusCode={lastStatusCode} />
+                      <StatusTooltip
+                        status={lastEntry.status}
+                        message={lastEntry.message}
+                      />
                     </div>
                   </div>
                 </div>

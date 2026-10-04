@@ -1,4 +1,5 @@
 import { UptimeBar } from "./UptimeBar"
+import { Status } from "../enums/status"
 import type { TimelineEntry } from "../types/Timeline"
 
 type UptimeTimelineProps = {
@@ -8,7 +9,7 @@ type UptimeTimelineProps = {
 export default function UptimeTimeline({ data }: UptimeTimelineProps) {
   const uptime =
     Math.trunc(
-      (data.filter((e) => e.statusCode === 200).length / data.length) * 1000
+      (data.filter((e) => e.status === Status.Healthy).length / data.length) * 1000
     ) / 10
 
   return (
